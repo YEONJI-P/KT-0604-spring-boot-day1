@@ -10,11 +10,15 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     boolean existsByIdNotAndName(Long id, String employeeName);
 
+    boolean existsByDepartmentId(Long departmentId);
+
     // @Query 로 fetch join 사용하지 않은 이유
     // 응답 dto 조립 시 department 는 department domain 단에서 처리
     // 현재 employee list dto에서 department relation 참조 X
     // N+1 문제 X
     List<Employee> findByDepartmentId(Long departmentId);
+
+
 
 
 }
