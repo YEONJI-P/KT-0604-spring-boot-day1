@@ -34,10 +34,10 @@ public class DepartmentController {
         return DepartmentResponse.from(department);
     }
     // 새로운 DTO 로 처리
-    @GetMapping("with-employees/{id}")
-    public DepartmentWithEmployeeResponse listWithEmployees(@PathVariable Long id){
-
-    }
+//    @GetMapping("with-employees/{id}")
+//    public DepartmentWithEmployeeResponse listWithEmployees(@PathVariable Long id){
+//
+//    }
 
 
     @PostMapping
