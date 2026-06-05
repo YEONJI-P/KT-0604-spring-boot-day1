@@ -3,6 +3,7 @@ package com.sesac.aibackend.controller;
 import com.sesac.aibackend.domain.Department;
 import com.sesac.aibackend.dto.DepartmentRequest;
 import com.sesac.aibackend.dto.DepartmentResponse;
+import com.sesac.aibackend.dto.DepartmentWithEmployeeResponse;
 import com.sesac.aibackend.error.NotFoundException;
 import com.sesac.aibackend.service.DepartmentService;
 import jakarta.validation.Valid;
@@ -32,6 +33,12 @@ public class DepartmentController {
                 .orElseThrow(()-> NotFoundException.of("department",id));
         return DepartmentResponse.from(department);
     }
+    // 새로운 DTO 로 처리
+    @GetMapping("with-employees/{id}")
+    public DepartmentWithEmployeeResponse listWithEmployees(@PathVariable Long id){
+
+    }
+
 
     @PostMapping
     public ResponseEntity<DepartmentResponse> create(@Valid@RequestBody DepartmentRequest req){

@@ -1,6 +1,7 @@
 package com.sesac.aibackend.service;
 
 import com.sesac.aibackend.domain.Department;
+import com.sesac.aibackend.dto.DepartmentWithEmployeeResponse;
 import com.sesac.aibackend.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,11 @@ public class DepartmentService {
         return departmentRepository.existsByDepartmentName(departmentName);
 
     }
+
+//    @Transactional(readOnly = true)
+//    public List<DepartmentWithEmployeeResponse> listWithEmployees(Long id){
+//
+//    }
 
     @Transactional
     public Department save(Department department) {
