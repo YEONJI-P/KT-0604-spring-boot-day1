@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/departments")
@@ -20,10 +21,10 @@ import java.net.URI;
 public class DepartmentController {
     private final DepartmentService departmentService;
 
-//    @GetMapping
-//    public List<DepartmentResponse> list(){
-//        return departmentService.findAll().stream().map(DepartmentResponse::from).toList();
-//    }
+    @GetMapping
+    public List<DepartmentResponse> list(){
+        return departmentService.findAll().stream().map(DepartmentResponse::from).toList();
+    }
 
     @GetMapping("/{id}")
     public DepartmentResponse get(@PathVariable Long id){

@@ -36,12 +36,19 @@ public class EmployeeController {
 
     }
 
-    // 혼합
+
+    // 부서정보포함
     @GetMapping("/with-department")
     public List<EmployeeResponse> listWithDepartment(@RequestParam Long departmentId) {
         return employeeService.findByDepartmentIdWithDepartment(departmentId).stream()
                 .map(EmployeeResponse::fromWIthDepartmentName)
                 .toList();
+    }
+
+    // 특정 사용자 부서 정보 포함
+    @GetMapping("/with-department/{id}")
+    public EmployeeResponse findByIdWithDepartment(@PathVariable Long id){
+        return employeeService.findByIdWithDepartment(id);
     }
 
     // create

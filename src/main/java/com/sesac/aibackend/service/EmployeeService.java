@@ -3,6 +3,7 @@ package com.sesac.aibackend.service;
 import com.sesac.aibackend.domain.Department;
 import com.sesac.aibackend.domain.Employee;
 import com.sesac.aibackend.dto.EmployeeRequest;
+import com.sesac.aibackend.dto.EmployeeResponse;
 import com.sesac.aibackend.error.NotFoundException;
 import com.sesac.aibackend.repository.DepartmentRepository;
 import com.sesac.aibackend.repository.EmployeeRepository;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +31,16 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public Optional<Employee> findById(Long id){
         return employeeRepository.findById(id);
+    }
+
+    // 부서 정보까지 return 할 경우
+    @Transactional(readOnly = true)
+    public EmployeeResponse findByIdWithDepartment(Long id){
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(()-> NotFoundException.of("employee",id));
+
+        return EmployeeResponse.fromWIthDepartmentName(employee);
+
     }
 
     @Transactional(readOnly = true)
