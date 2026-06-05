@@ -6,7 +6,7 @@ public record EmployeeResponse(
         Long id,
         Long departmentId,
         String departmentName,
-        String employeeName
+        String name
 ) {
     public static EmployeeResponse from(Employee employee){
         return new EmployeeResponse(
@@ -18,7 +18,7 @@ public record EmployeeResponse(
     }
 
     // fetchJoin
-    public static EmployeeResponse fromWIthDepartmentName(Employee employee){
+    public static EmployeeResponse fromWithDepartmentName(Employee employee){
         return new EmployeeResponse(
                 employee.getId(),
                 employee.getDepartment().getId(),

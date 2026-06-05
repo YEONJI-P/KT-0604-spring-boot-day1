@@ -12,6 +12,7 @@ public interface EmployeeRepository extends JpaRepository<Employee,Long> {
 
     boolean existsByIdNotAndName(Long id, String employeeName);
 
+    // N:1 관계 fetch join N+1 방지
     @Query("""
 select e from Employee e
 join fetch e.department
