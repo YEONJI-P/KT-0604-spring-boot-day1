@@ -37,4 +37,8 @@ out/
 .vscode/
 
 
+### env file ###
 .env
+
+### docker storage ###
+pgdata/
