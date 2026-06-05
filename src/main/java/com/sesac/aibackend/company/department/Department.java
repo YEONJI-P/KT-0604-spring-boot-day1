@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name="departments")
+@Table(name = "departments")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -19,8 +19,6 @@ public class Department {
             nullable = false,
             length = 100)
     private String name;
-
-
 
 
 }

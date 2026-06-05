@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 public record DepartmentRequest(
         @NotNull String name
 ) {
-    public Department toEntity(){
+    public Department toEntity() {
         return Department.builder().name(name).build();
     }
 }

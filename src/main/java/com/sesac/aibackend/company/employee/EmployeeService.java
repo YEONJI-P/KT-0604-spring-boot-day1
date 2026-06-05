@@ -105,11 +105,11 @@ public class EmployeeService {
     }
 
     // get list with department
-    // fk 를 조건으로 employee 목록 조회
+    // department id fk 를 조건으로 employee 목록 조회
     // department controller에서 사용
     @Transactional(readOnly = true)
-    public List<Employee> findByDepartmentIdWithDepartment(Long departmentId){
-        return employeeRepository.findByDepartmentIdWithDepartment(departmentId);
+    public List<Employee> findByDepartmentId(Long departmentId){
+        return employeeRepository.findByDepartmentId(departmentId);
     }
 
 }

@@ -7,7 +7,7 @@ public record DepartmentResponse(
         String name
 
 ) {
-    public static DepartmentResponse from(Department department){
-        return new DepartmentResponse(department.getId(),department.getName());
+    public static DepartmentResponse from(Department department) {
+        return new DepartmentResponse(department.getId(), department.getName());
     }
 }
