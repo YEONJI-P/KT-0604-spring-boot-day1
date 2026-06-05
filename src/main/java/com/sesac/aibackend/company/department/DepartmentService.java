@@ -1,8 +1,10 @@
-package com.sesac.aibackend.service;
+package com.sesac.aibackend.company.department;
 
-import com.sesac.aibackend.domain.Department;
-import com.sesac.aibackend.dto.DepartmentWithEmployeeResponse;
-import com.sesac.aibackend.repository.DepartmentRepository;
+import com.sesac.aibackend.company.department.dto.DepartmentWithEmployeeMember;
+import com.sesac.aibackend.company.department.dto.DepartmentWithEmployeeResponse;
+import com.sesac.aibackend.company.employee.Employee;
+import com.sesac.aibackend.company.employee.EmployeeRepository;
+import com.sesac.aibackend.error.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +17,6 @@ import java.util.Optional;
 public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
-
     // Get
     @Transactional(readOnly = true)
     public List<Department> findAll(){
@@ -33,15 +34,8 @@ public class DepartmentService {
 
     @Transactional(readOnly = true)
     public boolean existsByName(String departmentName){
-        return departmentRepository.existsByDepartmentName(departmentName);
-
+        return departmentRepository.existsByName(departmentName);
     }
-
-//    @Transactional(readOnly = true)
-//    public List<DepartmentWithEmployeeResponse> listWithEmployees(Long id){
-//
-//    }
-
     @Transactional
     public Department save(Department department) {
         return departmentRepository.save(department);

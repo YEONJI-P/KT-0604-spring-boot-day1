@@ -1,4 +1,4 @@
-package com.sesac.aibackend.domain;
+package com.sesac.aibackend.company.department;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +18,7 @@ public class Department {
     @Column(unique = true,
             nullable = false,
             length = 100)
-    private String departmentName;
+    private String name;
 
 
 

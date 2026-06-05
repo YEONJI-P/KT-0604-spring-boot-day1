@@ -1,6 +1,6 @@
-package com.sesac.aibackend.dto;
+package com.sesac.aibackend.company.employee.dto;
 
-import com.sesac.aibackend.domain.Employee;
+import com.sesac.aibackend.company.employee.Employee;
 
 public record EmployeeResponse(
         Long id,
@@ -13,7 +13,7 @@ public record EmployeeResponse(
                 employee.getId(),
                 employee.getDepartment().getId(),
                 null,
-                employee.getEmployeeName()
+                employee.getName()
         );
     }
 
@@ -22,8 +22,8 @@ public record EmployeeResponse(
         return new EmployeeResponse(
                 employee.getId(),
                 employee.getDepartment().getId(),
-                employee.getDepartment().getDepartmentName(),
-                employee.getEmployeeName()
+                employee.getDepartment().getName(),
+                employee.getName()
                 );
     }
 }

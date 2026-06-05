@@ -1,17 +1,16 @@
-package com.sesac.aibackend.service;
+package com.sesac.aibackend.company.employee;
 
-import com.sesac.aibackend.domain.Department;
-import com.sesac.aibackend.domain.Employee;
-import com.sesac.aibackend.dto.EmployeeRequest;
-import com.sesac.aibackend.dto.EmployeeResponse;
+import com.sesac.aibackend.company.department.Department;
+import com.sesac.aibackend.company.employee.dto.EmployeeRequest;
+import com.sesac.aibackend.company.employee.dto.EmployeeResponse;
 import com.sesac.aibackend.error.NotFoundException;
-import com.sesac.aibackend.repository.DepartmentRepository;
-import com.sesac.aibackend.repository.EmployeeRepository;
+import com.sesac.aibackend.company.department.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +22,7 @@ public class EmployeeService {
 
     // 직원 전체 정보 get
     @Transactional(readOnly = true)
-    public List<Employee> list(){
+    public List<Employee> findAll(){
         return employeeRepository.findAll();
     }
 
@@ -55,8 +54,8 @@ public class EmployeeService {
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(()-> NotFoundException.of("department",departmentId));
         return employeeRepository.save(
-                Employee.builder().
-                        employeeName(employeeName)
+                Employee.builder()
+                        .name(employeeName)
                         .department(department)
                         .build()
         );
@@ -65,13 +64,18 @@ public class EmployeeService {
 
     // update
     @Transactional
-    public Employee update(Long id,EmployeeRequest req){
+    public Employee update(Long id, EmployeeRequest req){
         // 변경하려는 유저 객체가 존재하는지
         Employee employee = employeeRepository
                 .findById(id)
                 .orElseThrow(()-> NotFoundException.of("employee",id));
         Department department = employee.getDepartment();
-
+        // 만약 이름을 변경하려고 할 때 변경하려는 유저이름이 존재하는지
+        // employee name이 unique 제약일때만 사용
+        if(employeeRepository.existsByIdNotAndName(id,req.name())){
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "employeeName already exists: " + req.name());
+        }
         // 만약 department 를 변경한다면 department 존재하는지 체크
         if(!department.getId().equals(req.departmentId())){
             department = departmentRepository.findById(req.departmentId())
@@ -79,7 +83,7 @@ public class EmployeeService {
         }
 
         // 전부 통과했으면 update
-        employee.updateAll(req.employeeName(),department);
+        employee.updateAll(req.name(),department);
         employeeRepository.save(employee);
 
         return employee;
@@ -93,7 +97,7 @@ public class EmployeeService {
 
     @Transactional(readOnly = true)
     public boolean existsByEmployeeName(String employeeName){
-        return employeeRepository.existsByEmployeeName(employeeName);
+        return employeeRepository.existsByName(employeeName);
     }
 
 

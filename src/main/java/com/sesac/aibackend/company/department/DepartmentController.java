@@ -1,11 +1,12 @@
-package com.sesac.aibackend.controller;
+package com.sesac.aibackend.company.department;
 
-import com.sesac.aibackend.domain.Department;
-import com.sesac.aibackend.dto.DepartmentRequest;
-import com.sesac.aibackend.dto.DepartmentResponse;
-import com.sesac.aibackend.dto.DepartmentWithEmployeeResponse;
+import com.sesac.aibackend.company.department.dto.DepartmentRequest;
+import com.sesac.aibackend.company.department.dto.DepartmentResponse;
+import com.sesac.aibackend.company.department.dto.DepartmentWithEmployeeMember;
+import com.sesac.aibackend.company.department.dto.DepartmentWithEmployeeResponse;
+import com.sesac.aibackend.company.employee.Employee;
+import com.sesac.aibackend.company.employee.EmployeeService;
 import com.sesac.aibackend.error.NotFoundException;
-import com.sesac.aibackend.service.DepartmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,30 +22,42 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DepartmentController {
     private final DepartmentService departmentService;
+    private final EmployeeService employeeService;
 
+    // 목록 조회
     @GetMapping
     public List<DepartmentResponse> list(){
         return departmentService.findAll().stream().map(DepartmentResponse::from).toList();
     }
-
+    // 특정부서 조회 (employee 정보 미포함)
     @GetMapping("/{id}")
     public DepartmentResponse get(@PathVariable Long id){
         Department department = departmentService.findById(id)
                 .orElseThrow(()-> NotFoundException.of("department",id));
         return DepartmentResponse.from(department);
     }
+    // 특정 부서 조회 (employee 정보 포함)
     // 새로운 DTO 로 처리
-//    @GetMapping("with-employees/{id}")
-//    public DepartmentWithEmployeeResponse listWithEmployees(@PathVariable Long id){
-//
-//    }
+    @GetMapping("/{id}/with-employees")
+    public DepartmentWithEmployeeResponse listWithEmployees(@PathVariable Long id){
+        // department
+        // OneToMany 관계 설정 X 직접 참조 X
+        // 간접참조 디커플링
+        Department department = departmentService.findById(id)
+                .orElseThrow(()-> NotFoundException.of("department",id));
+        List<Employee> employees = employeeService.findByDepartmentIdWithDepartment(id);
+
+        return DepartmentWithEmployeeResponse.from(department,
+                employees.stream().map(DepartmentWithEmployeeMember::from).toList());
+
+    }
 
 
     @PostMapping
     public ResponseEntity<DepartmentResponse> create(@Valid@RequestBody DepartmentRequest req){
-        if(departmentService.existsByName(req.departmentName())){
+        if(departmentService.existsByName(req.name())){
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "departmentName already exists: "+ req.departmentName());
+                    "departmentName already exists: "+ req.name());
         }
 
         Department saved = departmentService.save(req.toEntity());

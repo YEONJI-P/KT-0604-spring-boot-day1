@@ -1,6 +1,5 @@
-package com.sesac.aibackend.repository;
+package com.sesac.aibackend.company.department;
 
-import com.sesac.aibackend.domain.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -8,5 +7,6 @@ import java.util.Optional;
 
 public interface DepartmentRepository extends JpaRepository<Department,Long> {
 
-    boolean existsByDepartmentName(String departmentName);
+    boolean existsByName(String departmentName);
+
 }

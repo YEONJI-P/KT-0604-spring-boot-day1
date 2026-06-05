@@ -1,5 +1,6 @@
-package com.sesac.aibackend.domain;
+package com.sesac.aibackend.company.employee;
 
+import com.sesac.aibackend.company.department.Department;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,14 +18,14 @@ public class Employee {
     @Column(unique = true,
             nullable = false,
             length = 100)
-    private String employeeName;
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", nullable = false)
+    @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
-    public void updateAll(String _employeeName, Department _department){
-        this.employeeName = _employeeName;
-        this.department = _department;
+    public void updateAll(String name, Department department){
+        this.name = name;
+        this.department = department;
     }
 }
