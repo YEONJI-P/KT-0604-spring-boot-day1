@@ -25,6 +25,7 @@ public class SecurityConfig {
     private final RestAccessDeniedHandler accessDeniedHandler;
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -51,6 +52,9 @@ public class SecurityConfig {
                         // 그 외 모두 인증 필요 (Day 3 JPA CRUD, /chat 등)
                         .anyRequest().authenticated()
                 )
+                // 다른 provider 사용하더라도 이쪽은 수정 X 한줄만
+                // OAuth2LoginSuccessHandler 쪽에서 provider 분기 넣어주면 됨
+                .oauth2Login(oauth2 -> oauth2.successHandler(oAuth2LoginSuccessHandler))
                 // H2 콘솔 사용을 위한 헤더 완화 (개발 프로파일만)
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 // Username 필터 전에 jwtAuthFilter 를 쓴다
