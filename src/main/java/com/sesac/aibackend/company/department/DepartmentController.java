@@ -33,7 +33,7 @@ public class DepartmentController {
 
     // 특정 부서 조회 (employee list 정보 포함)
     // 새로운 DTO 로 처리
-    @GetMapping("/{id}/with-employees")
+    @GetMapping("/{id}/employees")
     public DepartmentWithEmployees listWithEmployees(@PathVariable Long id) {
         // OneToMany 관계 설정 X 직접 참조 X
         // 간접참조 디커플링

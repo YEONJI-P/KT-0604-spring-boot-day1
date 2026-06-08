@@ -29,7 +29,7 @@ public class EmployeeController {
         return EmployeeResponse.from(employeeService.findById(id));
     }
     // get one with department persistence context
-    @GetMapping("/{id}/with-department")
+    @GetMapping("/{id}/department")
     public EmployeeResponse findByIdWithDepartment(@PathVariable Long id){
         return employeeService.findByIdWithDepartment(id);
     }
