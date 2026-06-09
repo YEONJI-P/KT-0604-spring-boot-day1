@@ -6,19 +6,47 @@ spring:
   security:
     oauth2:
       client:
+        # spring security oauth filter 가 (controller) 자동으로 생성
+        # http://localhost:8080/oauth2/authorization/{registrationId}
+        # 해당 경로로 이동 시 각 공급자의 oauth redirect login 경로로 이동 시킴
+        # 공급자에서 login 후 redirect 하는 경로는 filter chain 에서 자동으로
+        # 이동 후 처리는 SecurityConfig 에서 oauth2Login 속성에 따라 처리
+        # 원래는 OAuth2UserService 계층을 custom 하는 건데 ...
+        # 이 프로젝트에서는 별도 service 생성하지않고 success handler 에서 catch 해서 처리
+        # 시스템 동작(메커니즘) 자체는 동일. (인가코드 수신 ➔ 토큰 교환 ➔ 유저 정보 조회)
+        # google 등은 대부분 uri 를 spring security 내부적으로 알고 있지만 kakao 등은 직접 명시해줘야함
         registration:
           google:
             # 실제 값은 GOOGLE_CLIENT_ID/SECRET 환경변수로 주입. 자격증명 없이도 컨텍스트가
             # 기동되도록 자리표시자 기본값을 둡니다(이 값으로는 실제 구글 로그인 불가).
+            # google, github 의
             client-id: ${GOOGLE_CLIENT_ID:changeme-google-client-id}
             client-secret: ${GOOGLE_CLIENT_SECRET:changeme-google-client-secret}
             scope:
               - openid
               - email
               - profile
+          # 👇 카카오 Client 설정 추가
+#          kakao:
+#            client-id: ${KAKAO_API_KEY:changeme-kakao-client-id}         # 카카오 REST API 키
+#            client-secret: ${KAKAO_CLIENT_SECRET:changeme-kakao-client-secret} # 필요 시 설정 (기본은 필수 아님)
+#            client-authentication-method: client_secret_post
+#            authorization-grant-type: authorization_code
+#            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao" # Spring Security가 인가 코드를 받을 백엔드 주소
+#            client-name: Kakao
+#            scope:
+#              - profile_nickname
+#              - account_email
         provider: # ← 추가
           google:
+            # prompt-consent 옵션
+            # 로그인할 때마다 강제로 구글 동의 화면을 다시 띄우고 싶을 때
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?prompt=consent
+#          kakao:
+#            authorization-uri: https://kauth.kakao.com/oauth/authorize
+#            token-uri: https://kauth.kakao.com/oauth/token # oauth 로그인 후 oauth token 요청
+#            user-info-uri: https://kapi.kakao.com/v2/user/me # oauth 로그인, token 교환 후 유저 정보 요청 uri
+#            user-name-attribute: id # 카카오가 넘겨주는 유저 정보의 key값 (Long 타입 id)
 
 jwt:
   secret: ${JWT_SECRET:please-change-this-to-a-32-byte-minimum-secret-key}
