@@ -55,12 +55,12 @@ public class User {
      * 구글이 보증하는 불변 식별자(sub)를 providerId에 저장합니다.
      * 이로써 이 계정은 폼 로그인(/login)으로는 인증될 수 없고 구글 로그인만 가능합니다.
      */
-    public static User oauthUser(String email, String providerId) {
+    public static User oauthUser(String email, String provider, String providerId) {
         return User.builder()
                 .username(email)
                 .passwordHash(null)
                 .role(Role.USER)
-                .provider("GOOGLE")
+                .provider(provider)
                 .providerId(providerId)
                 .build();
     }

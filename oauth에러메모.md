@@ -239,3 +239,117 @@ OIDC 표준 명세(RFC 8414)에 따라 카카오 인증 서버는 설정 정보�
 • OIDC를 사용하지 않는 경우: 만약 카카오 디벨로퍼스 콘솔에서 OpenID Connect를 끄고 싶다면, application.yaml의  scope 에서  openid 를 제거하고 일반 OAuth 2.0 방식으로 전환하셔야
 합니다. 
 
+### openid configuration response
+```json
+{
+"issuer": "https://kauth.kakao.com",
+"authorization_endpoint": "https://kauth.kakao.com/oauth/authorize",
+"token_endpoint": "https://kauth.kakao.com/oauth/token",
+"userinfo_endpoint": "https://kapi.kakao.com/v1/oidc/userinfo",
+"jwks_uri": "https://kauth.kakao.com/.well-known/jwks.json",
+"token_endpoint_auth_methods_supported": [
+"client_secret_post"
+],
+"subject_types_supported": [
+"pairwise"
+],
+"id_token_signing_alg_values_supported": [
+"RS256"
+],
+"request_uri_parameter_supported": false,
+"response_types_supported": [
+"code"
+],
+"response_modes_supported": [
+"query"
+],
+"grant_types_supported": [
+"authorization_code",
+"refresh_token"
+],
+"code_challenge_methods_supported": [
+"S256"
+],
+"claims_supported": [
+"iss",
+"aud",
+"sub",
+"auth_time",
+"exp",
+"iat",
+"nonce",
+"nickname",
+"picture",
+"email"
+]
+}
+```
+
+
+provider.kakao.issuer-uri  설정이 있으면 Spring Security가 OIDC Discovery 스펙에 맞춰 필요한 URI( authorization-uri ,  token-uri ,  user-info-uri ,  jwk-set-uri  등)를 카카오
+인증                                                                                                                                                                            
+서버로부터 자동으로 조회하여 내부적으로 구성합니다. 따라서 해당 URI들은 직접 작성하실 필요가 없습니다.
+
+단,  registration  레벨 설정에서 아래 항목들은 스프링 시큐리티에 기본 등록된 공급자가 아니기 때문에 명시해 주셔야 합니다:
+
+•  client-id  및  client-secret                                                                                                                                                
+•  authorization-grant-type: authorization_code                                                                                                                                
+•  redirect-uri : 카카오는 구글/페이스북처럼 스프링에 기본 템플릿(CommonOAuth2Provider)이 내장되어 있지 않아 리디렉션 URI 매핑을 위해 기재해야 합니다.                         
+•  scope : OIDC 사용을 위한  openid  필수 포함
+
+
+
+## provider registraion id 분기 처리
+
+### 1. 스프링 시큐리티 토큰의 계층 구조
+    classDiagram                                                                                                                                                                  
+        class Principal {                                                                                                                                                         
+            <<interface>>                                                                                                                                                         
+            +getName() String                                                                                                                                                     
+        }                                                                                                                                                                         
+        class Authentication {                                                                                                                                                    
+            <<interface>>                                                                                                                                                         
+            +getAuthorities()                                                                                                                                                     
+            +getPrincipal()                                                                                                                                                       
+            +isAuthenticated()                                                                                                                                                    
+        }                                                                                                                                                                         
+        class AbstractAuthenticationToken {                                                                                                                                       
+            <<abstract class>>                                                                                                                                                    
+            -authorities                                                                                                                                                          
+            -authenticated                                                                                                                                                        
+            +getName()                                                                                                                                                            
+        }                                                                                                                                                                         
+        class OAuth2AuthenticationToken {                                                                                                                                         
+            <<class>>                                                                                                                                                             
+            -principal                                                                                                                                                            
+            -authorizedClientRegistrationId                                                                                                                                       
+            +getAuthorizedClientRegistrationId()                                                                                                                                  
+        }                                                                                                                                                                         
+                                                                                                                                                                                  
+        Authentication --|> Principal : extends (인터페이스 간 상속)                                                                                                              
+        AbstractAuthenticationToken ..|> Authentication : implements (클래스가 인터페이스 구현)                                                                                   
+        OAuth2AuthenticationToken --|> AbstractAuthenticationToken : extends (클래스 간 상속)                                                                                     
+
+1. ** Authentication (인터페이스) **는 자바 표준 보안 인터페이스인  Principal 을  extends  합니다.
+2. ** AbstractAuthenticationToken (추상 클래스) **은 공통 보안 로직(권한 목록 관리 등)을 담기 위해  Authentication  인터페이스를  implements  하여 기초 뼈대를 구현했습니다.
+3. ** OAuth2AuthenticationToken (일반 클래스) **은 소셜 로그인에 필요한 전용 정보(공급자 ID인  registrationId  등)를 추가하기 위해  AbstractAuthenticationToken 을  extends     
+   했습니다.
+
+따라서 다형성(Polymorphism)에 의해  OAuth2AuthenticationToken  객체는  Authentication  타입이기도 합니다.                
+
+### 2.  extends  와  implements  의 차이점
+
+가장 쉽게 구분하는 기준은 "기능을 물려받아 그대로 쓸 것인가(상속)" 대 **"규격에 맞게 설계도를 직접 조립할 것인가(구현)"**입니다.
+
+구분           │  extends  (상속)                                                            │  implements  (구현)
+────────────────┼─────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────
+대상 관계      │ 클래스 ➔ 클래스인터페이스 ➔ 인터페이스(같은 종류끼리 확장할 때)             │ 클래스 ➔ 인터페이스(다른 종류끼리 구현할 때)
+다중 사용 여부 │ 단일 상속만 가능(부모 클래스는 오직 1개만 지정 가능)                        │ 다중 구현 가능(여러 설계도(인터페이스)를 조합 가능)
+핵심 목적      │ 코드의 재사용 및 확장부모의 변수나 완성된 메서드 로직을 그대로 가져다       │ 동일한 규격(API) 강제추상 메서드(껍데기)만 가져와서 본체( implements  하는
+│ 씁니다.                                                                     │ 클래스)가 직접 알맹이를 작성해야 합니다.
+예시 비유      │ 아반떼를 개조해서 아반떼 스포츠를 만듦 (자동차의 기본 뼈대와 기능을 그대로  │ 스마트폰 제조사가 무선 충전 표준(인터페이스) 규격에 맞춰 각자 폰을 만듦 (규격만
+│ 상속)                                                                       │ 준수하여 내부 회로는 알아서 구현)
+
+•  extends :  OAuth2AuthenticationToken 은  AbstractAuthenticationToken 이 이미 만들어 둔 공통 필드(권한 리스트 등)와 로직을 재사용하기 때문에  extends 를 썼습니다.           
+•  implements :  AbstractAuthenticationToken 은 시큐리티 프레임워크가 요구하는  Authentication 이라는 규격을 만족시켜 필터 등에서 호출될 수 있도록 구현해야 하므로  implements
+를 썼습니다.                                                                              

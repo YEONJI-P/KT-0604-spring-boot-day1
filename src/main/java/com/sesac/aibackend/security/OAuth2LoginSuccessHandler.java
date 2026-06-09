@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -40,14 +41,22 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication) throws IOException {
 
+        // type cast 방식을 쓰는 게 맞나 애초에 method argument 단에서 oauth token 을 받는건 다른 동작인가 ?
+        // Downcasting
+        // handler 는 필터체인 단에서 동작하므로 인터페이스 시그니처 준수해야함
+        // 가장 범용적인 Authentication 객체로 매개변수를 가짐
+        // Authentication 을 구현한 하위 클래스 OAuth2AuthenticationToken
+        // 다운캐스팅을 통해 하위 클래스 고유 메서드 호출
+        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken)authentication;
+        String provider = oauthToken.getAuthorizedClientRegistrationId().toUpperCase();
+
         OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
         String email = oidcUser.getEmail();
         // OIDC sub: 구글이 보증하는 불변 고유 식별자. 이메일과 달리 변경·재사용되지 않습니다.
         String providerId = oidcUser.getSubject();
-
         // (provider, providerId)로 우리 DB 사용자를 조회하거나, 처음이면 신규 생성
-        User user = userRepository.findByProviderAndProviderId("GOOGLE", providerId)
-                .orElseGet(() -> userRepository.save(User.oauthUser(email, providerId)));
+        User user = userRepository.findByProviderAndProviderId(provider, providerId)
+                .orElseGet(() -> userRepository.save(User.oauthUser(email, provider, providerId)));
 
         // 폼 로그인과 동일한 방식으로 앱 자체 JWT 발급
         String token = jwtUtil.generate(user.getUsername(), user.getRole().name());
