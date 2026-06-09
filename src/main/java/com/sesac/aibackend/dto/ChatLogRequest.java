@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record ChatLogRequest(
-        @NotNull Long userId,
+        @NotNull String username,
         @NotBlank String prompt,
         String response
 ) {

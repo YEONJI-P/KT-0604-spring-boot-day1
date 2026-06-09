@@ -14,7 +14,7 @@ spring:
         # 원래는 OAuth2UserService 계층을 custom 하는 건데 ...
         # 이 프로젝트에서는 별도 service 생성하지않고 success handler 에서 catch 해서 처리
         # 시스템 동작(메커니즘) 자체는 동일. (인가코드 수신 ➔ 토큰 교환 ➔ 유저 정보 조회)
-        # google 등은 대부분 uri 를 spring security 내부적으로 알고 있지만 kakao 등은 직접 명시해줘야함
+        # google 등은 대부분 uri 를 spring security 내부적으로 알고 있지만 kakao 등은 직접 명시해줘야함.
         registration:
           google:
             # 실제 값은 GOOGLE_CLIENT_ID/SECRET 환경변수로 주입. 자격증명 없이도 컨텍스트가
@@ -55,6 +55,10 @@ jwt:
 app:
   oauth2:
     redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:5173/oauth/callback}
+
+python:
+  base-url: ${PYTHON_BASE_URL:http://localhost:8000}
+
 ---
 spring:
   config:
